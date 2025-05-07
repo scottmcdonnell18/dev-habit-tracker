@@ -7,19 +7,32 @@ function getTodayDateStr() {
 }
 
 function getStreak() {
-  return JSON.parse(localStorage.getItem("streakData")) || {
-    lastDate: null,
-    streak: 0,
-  };
-}
+    return JSON.parse(localStorage.getItem("streakData")) || {
+      lastDate: null,
+      streak: 0,
+      history: [],
+    };
+  }
+  
 
 function setStreak(data) {
   localStorage.setItem("streakData", JSON.stringify(data));
 }
 
 function updateUI(streak) {
-  streakDisplay.textContent = `Current Streak: ${streak} day${streak !== 1 ? "s" : ""}`;
-}
+    streakDisplay.textContent = `Current Streak: ${streak} day${streak !== 1 ? "s" : ""}`;
+  
+    const historyList = document.getElementById("historyList");
+    const data = getStreak();
+    historyList.innerHTML = "";
+  
+    data.history.forEach((date) => {
+      const li = document.createElement("li");
+      li.textContent = `✔️ ${date}`;
+      historyList.appendChild(li);
+    });
+  }
+  
 
 button.addEventListener("click", () => {
   const today = getTodayDateStr();
@@ -42,13 +55,27 @@ button.addEventListener("click", () => {
     newStreak = 1;
   }
 
+  const history = data.history || [];
+  history.push(today);
   const updatedData = {
     lastDate: today,
     streak: newStreak,
+    history: history,
   };
+  
 
   setStreak(updatedData);
   updateUI(newStreak);
+});
+
+const resetBtn = document.getElementById("resetBtn");
+
+resetBtn.addEventListener("click", () => {
+  if (confirm("Are you sure you want to reset your streak?")) {
+    const resetData = { lastDate: null, streak: 0 };
+    setStreak(resetData);
+    updateUI(0);
+  }
 });
 
 window.onload = () => {
